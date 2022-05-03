@@ -28,7 +28,13 @@ def check_guess(guess, word, not_letters, has_letters, position_letters):
     
     return not_letters, has_letters, position_letters
 
-def get_word_stats(words):
+def get_word_stats(letter):
+    input_file_path = 'cleaned_words.txt'
+    dictionary = open(input_file_path, 'r')
+    words = wordle_solver.read_in_dict(dictionary)
+    dictionary.close()
+    words = wordle_solver.words_with_letter_positions("{}____".format(letter), words)
+
     not_letters = ""
     has_letters = ""
     position_letters = "_____"
@@ -64,7 +70,7 @@ def get_word_stats(words):
     
     print("The average number of guesses per {} word is ".format(word[0]) + str(total_num_guesses/total_words))
 
-
+from time import time
 if __name__ == "__main__":
     alphabet = list("abcdefghijklmnopqrstuvwxyz")
 
@@ -72,11 +78,9 @@ if __name__ == "__main__":
     dictionary = open(input_file_path, 'r')
     words = wordle_solver.read_in_dict(dictionary)
     dictionary.close()
-    process_list = []
-    for letter in alphabet:
-        test_words = wordle_solver.words_with_letter_positions("{}____".format(letter), words)
-        tester = mul.Process(target=get_word_stats, args=([test_words]))
-        process_list.append(tester)
+    timer = time()
 
-    for process in process_list:
-        process.start()
+    testers = mul.Pool()
+    testers.map(get_word_stats, alphabet)
+    testers.close()
+    print("Time taken:", time() - timer)

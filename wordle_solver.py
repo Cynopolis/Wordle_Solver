@@ -51,6 +51,7 @@ def words_with_letter_positions(guess, dictionary):
     for letter in guess:
         if letter != "_": match_amount += 1
     if match_amount == 0: return dictionary
+    if len(dictionary) == 0: return dictionary
 
     valid_words = []
     for word in dictionary:
@@ -66,6 +67,27 @@ def words_with_letter_positions(guess, dictionary):
                 continue
     return valid_words
 
+''' this funcion takes a dictionary like this
+dictionary = {
+    'a' : [False, False, False, False, False],
+    'b' : [False, True, False, False, False]
+}
+'''
+
+def words_letter_not_position(guess, dictionary):
+    if len(guess) == 0: return dictionary
+    valid_words = []
+    for word in dictionary:
+        match = 5
+        for letter in guess:
+            for i, value in enumerate(guess[letter]):
+                if word[i] == letter and value == True:
+                    match -= 1
+                #print(word, word[i], letter, i, value, match)
+            if match == 5:
+                valid_words.append(word)
+    return valid_words
+
 def get_dict_stats(dictionary):
     letter_occurrences = {'a' : 0,
     'b' : 0,'c' : 0,'d' : 0,'e' : 0,'f' : 0,
@@ -73,6 +95,7 @@ def get_dict_stats(dictionary):
     'l' : 0,'m' : 0,'n' : 0,'o' : 0,'p' : 0,
     'q' : 0,'r' : 0,'s' : 0,'t' : 0,'u' : 0,
     'v' : 0,'w' : 0,'x' : 0,'y' : 0,'z' : 0}
+    if len(dictionary) == 0: return letter_occurrences
     letter_count = 0
     for word in dictionary:
         word = word.strip()
@@ -98,20 +121,3 @@ def get_entropy(guess, dict_stats):
 def entropy_sort_list(dictionary, dict_stats):
     # sort valid_words according to entropy
     return dictionary.sort(key=lambda word: get_entropy(word, dict_stats))
-
-'''
-words = read_in_dict(dictionary)
-dict_stats = get_dict_stats(words)
-entropy_sort_list(words, dict_stats)
-
-
-found_irate = False
-i = 0
-while not found_irate:
-    print(words[i], get_entropy(words[i], dict_stats))
-    if words[i] == "irate":
-        found_irate = True
-    i+=1
-
-
-dictionary.close()'''

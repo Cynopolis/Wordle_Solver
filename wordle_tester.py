@@ -1,4 +1,5 @@
 import wordle_solver
+import multiprocessing as mul
 
 def wordle_guess(not_letters, has_letters, position_letters):
     input_file_path = 'cleaned_words.txt'
@@ -17,22 +18,65 @@ def wordle_guess(not_letters, has_letters, position_letters):
 def check_guess(guess, word, not_letters, has_letters, position_letters):
 
     for i, letter in enumerate(guess):
-        if letter in word:
-            if letter not in has_letters:
-                if letter == word[i]:
-                    position_letters = position_letters[:i] + letter + position_letters[i+1:]
+        if letter in word and letter not in has_letters:
             has_letters += letter
-        else:
+        elif letter not in not_letters and letter not in has_letters:
             not_letters += letter
+
+        if letter == word[i]:
+            position_letters = position_letters[:i] + letter + position_letters[i+1:]
     
     return not_letters, has_letters, position_letters
 
-word = "irate"
-not_letters = ""
-has_letters = ""
-position_letters = "_____"
+def get_word_stats(words):
+    not_letters = ""
+    has_letters = ""
+    position_letters = "_____"
+    guesses = []
+    total_num_guesses = 0
+    total_words = 0
+    percentage = 0
+    last_percentage = 0
 
-for i in range(10):
-    guess = wordle_guess(not_letters, has_letters, position_letters)
-    not_letters, has_letters, position_letters = check_guess(guess[0], word, not_letters, has_letters, position_letters)
-    print(guess[0], not_letters, has_letters, position_letters)
+    for total_words, word in enumerate(words):
+        for x in range(20):
+            total_num_guesses += 1
+            guess = wordle_guess(not_letters, has_letters, position_letters)
+            new_guess = guess[0]
+            i = 0
+            while new_guess in guesses:
+                new_guess = guess[i]
+                i += 1
+
+            not_letters, has_letters, position_letters = check_guess(new_guess, word, not_letters, has_letters, position_letters)
+            guesses.append(new_guess)
+            #print(new_guess, not_letters, has_letters, position_letters)
+            if position_letters == word:
+                percentage = round(total_words*100/len(words), 0)
+                if percentage - last_percentage >= 5:
+                    print(str(percentage) + r"% finished with", word[0])
+                    last_percentage = percentage
+                not_letters = ""
+                has_letters = ""
+                position_letters = "_____"
+                guesses = []
+                break
+    
+    print("The average number of guesses per {} word is ".format(word[0]) + str(total_num_guesses/total_words))
+
+
+if __name__ == "__main__":
+    alphabet = list("abcdefghijklmnopqrstuvwxyz")
+
+    input_file_path = 'cleaned_words.txt'
+    dictionary = open(input_file_path, 'r')
+    words = wordle_solver.read_in_dict(dictionary)
+    dictionary.close()
+    process_list = []
+    for letter in alphabet:
+        test_words = wordle_solver.words_with_letter_positions("{}____".format(letter), words)
+        tester = mul.Process(target=get_word_stats, args=([test_words]))
+        process_list.append(tester)
+
+    for process in process_list:
+        process.start()

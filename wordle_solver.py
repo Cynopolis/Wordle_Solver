@@ -139,10 +139,14 @@ def wordle_guess(not_letters, has_letters, position_letters, not_position_letter
     return guesses
 
 if __name__ == "__main__":
-    not_letters = ""
-    has_letters = ""
-    position_letters = "_____"
+    not_letters = "asfld"
+    has_letters = "rote"
+    position_letters = "o__er"
     not_position_letters = {
+        'r' : [False, True, False, False, False],
+        'o' : [False, True, True, False, False],
+        'e' : [False, True, False, False, True],
+        't' : [False, False, True, False, False],
     }
 
     print(wordle_guess(not_letters, has_letters, position_letters, not_position_letters)[:10])

@@ -1,5 +1,4 @@
 import wordle_solver
-import multiprocessing as mul
 
 def wordle_guess(not_letters, has_letters, position_letters, not_position_letters, guesses = None):
     if guesses == None:
@@ -85,8 +84,11 @@ def get_word_stats(word, dictionary_path):
                 break
     return total_num_guesses
 
-from time import time
+
 if __name__ == "__main__":
+    import multiprocessing as mul
+    from time import time
+    
     alphabet = list("ab")
     input_file_path = 'cleaned_wordle_words.txt'
     dictionary = open(input_file_path, 'r')

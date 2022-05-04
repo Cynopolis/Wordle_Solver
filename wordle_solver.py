@@ -1,6 +1,6 @@
 from math import log
 
-input_file_path = 'cleaned_words.txt'
+input_file_path = 'cleaned_wordle_words.txt'
 
 dictionary = open(input_file_path, 'r')
 
@@ -84,8 +84,8 @@ def words_letter_not_position(guess, dictionary):
                 if word[i] == letter and value == True:
                     match -= 1
                 #print(word, word[i], letter, i, value, match)
-            if match == 5:
-                valid_words.append(word)
+        if match == 5:
+            valid_words.append(word)
     return valid_words
 
 def get_dict_stats(dictionary):
@@ -121,3 +121,28 @@ def get_entropy(guess, dict_stats):
 def entropy_sort_list(dictionary, dict_stats):
     # sort valid_words according to entropy
     return dictionary.sort(key=lambda word: get_entropy(word, dict_stats))
+
+
+def wordle_guess(not_letters, has_letters, position_letters, not_position_letters):
+    input_file_path = 'cleaned_wordle_words.txt'
+    dictionary = open(input_file_path, 'r')
+    guesses = read_in_dict(dictionary)
+    guesses = words_without_letters(not_letters, guesses)
+    guesses = words_with_letters(has_letters, guesses)
+    guesses = words_with_letter_positions(position_letters, guesses)
+    guesses = words_letter_not_position(not_position_letters, guesses)
+
+    dict_stats = get_dict_stats(guesses)
+    entropy_sort_list(guesses, dict_stats)
+    dictionary.close()
+
+    return guesses
+
+if __name__ == "__main__":
+    not_letters = ""
+    has_letters = ""
+    position_letters = "_____"
+    not_position_letters = {
+    }
+
+    print(wordle_guess(not_letters, has_letters, position_letters, not_position_letters)[:10])

@@ -1,5 +1,5 @@
-input_file_path = 'source_words.txt'
-output_file_path = 'cleaned_words.txt'
+input_file_path = 'wordle_words_source.txt'
+output_file_path = 'cleaned_wordle_words.txt'
 
 input_file = open(input_file_path, 'r')
 output_file = open(output_file_path, 'w')
@@ -12,9 +12,13 @@ def is_only_letters(word):
 
 
 for line in input_file:
-    word = line.strip()
-    if is_five_characters(word) and is_only_letters(word):
-        output_file.write(word.lower() + '\n')
+    words = line.split(",")
+    print(len(words))
+    for i, word in enumerate(words):
+        word = ''.join(filter(str.isalpha, word))
+        if is_five_characters(word):
+            output_file.write(word + '\n')
+    print(words)
 
 input_file.close()
 output_file.close()

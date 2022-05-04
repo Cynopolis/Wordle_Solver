@@ -1,10 +1,13 @@
 import wordle_solver
 import multiprocessing as mul
 
-def wordle_guess(not_letters, has_letters, position_letters, not_position_letters):
-    input_file_path = 'cleaned_words.txt'
-    dictionary = open(input_file_path, 'r')
-    guesses = wordle_solver.read_in_dict(dictionary)
+def wordle_guess(not_letters, has_letters, position_letters, not_position_letters, guesses = None):
+    if guesses == None:
+        input_file_path = 'cleaned_wordle_words.txt'
+        dictionary = open(input_file_path, 'r')
+        guesses = wordle_solver.read_in_dict(dictionary)
+        dictionary.close()
+
     guesses = wordle_solver.words_without_letters(not_letters, guesses)
     guesses = wordle_solver.words_with_letters(has_letters, guesses)
     guesses = wordle_solver.words_with_letter_positions(position_letters, guesses)
@@ -12,8 +15,6 @@ def wordle_guess(not_letters, has_letters, position_letters, not_position_letter
 
     dict_stats = wordle_solver.get_dict_stats(guesses)
     wordle_solver.entropy_sort_list(guesses, dict_stats)
-    dictionary.close()
-
     return guesses
 
 def check_guess(guess, word, not_letters, has_letters, position_letters, not_position_letters):
@@ -38,7 +39,7 @@ def check_guess(guess, word, not_letters, has_letters, position_letters, not_pos
     
     return not_letters, has_letters, position_letters, not_position_letters
 
-def get_word_stats(word):
+def get_word_stats(word, dictionary_path):
     words =[word]
     total_num_guesses = 0
     not_letters = ""
@@ -50,10 +51,14 @@ def get_word_stats(word):
     percentage = 0
     last_percentage = 0
 
+    dictionary = open(dictionary_path, 'r')
+    guess = wordle_solver.read_in_dict(dictionary)
+    dictionary.close()
+
     for total_words, word in enumerate(words):
         for x in range(20):
             total_num_guesses += 1
-            guess = wordle_guess(not_letters, has_letters, position_letters, not_position_letters)
+            guess = wordle_guess(not_letters, has_letters, position_letters, not_position_letters, guesses=guess)
             if len(guess) == 0:
                 print("No more guesses")
                 exit()
@@ -83,7 +88,7 @@ def get_word_stats(word):
 from time import time
 if __name__ == "__main__":
     alphabet = list("ab")
-    input_file_path = 'cleaned_words.txt'
+    input_file_path = 'cleaned_wordle_words.txt'
     dictionary = open(input_file_path, 'r')
     words = wordle_solver.read_in_dict(dictionary)
     dictionary.close()
@@ -94,7 +99,7 @@ if __name__ == "__main__":
     results = []
 
     for i, word in enumerate(words):
-        results.append(testers.apply_async(get_word_stats, (word,)))
+        results.append(testers.apply_async(get_word_stats, (word,input_file_path,)))
         if i % 100 == 0:
             print(i, "words tested")
     print("Recovering Results")
@@ -107,4 +112,4 @@ if __name__ == "__main__":
             print("Timed out")
 
     print("Time taken:", time() - timer)
-    print("The average number of guesses per {} word is " + str(total_guesses/10))
+    print("The average number of guesses per word is " + str(total_guesses/len(words)))
